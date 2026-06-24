@@ -6,6 +6,7 @@ import {
     TextInput,
     TouchableOpacity,
     Image,
+    ActivityIndicator,
 } from "react-native";
 import { styles } from "./login.style";
 import { useNavigation } from "@react-navigation/native";
@@ -13,10 +14,51 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
-export function LoginScreen() {
+// Service qui appelle ton API Node.js
+import { loginUser } from "../../../services/service.authService";
+
+export function LoginScreen({ onLoginSuccess }: { onLoginSuccess: () => void }) {
     const navigation = useNavigation<any>();
+
+    // Afficher / masquer le mot de passe
     const [secure, setSecure] = useState(true);
+
+    // Option visuelle "Se souvenir de moi"
     const [rememberMe, setRememberMe] = useState(false);
+
+    // Champs du formulaire
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    // Etats d'interface
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    // Fonction appelée quand l'utilisateur clique sur "Se connecter"
+    const handleLogin = async () => {
+        try {
+            setError("");
+
+            // Petite validation côté frontend avant d'appeler l'API
+            if (!email.trim() || !password) {
+                setError("Veuillez renseigner votre email et votre mot de passe.");
+                return;
+            }
+
+            setLoading(true);
+
+            // Appel API : POST /login
+            await loginUser(email.trim(), password);
+
+            // Après connexion réussie, va vers ton écran principal.
+            // Remplace "home" par le vrai nom de ta navigation principale si besoin.
+          onLoginSuccess();
+        } catch (err: any) {
+            setError(err.message || "Une erreur est survenue pendant la connexion.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <ImageBackground
@@ -25,7 +67,6 @@ export function LoginScreen() {
             resizeMode="cover"
         >
             <View style={styles.top}>
-                {/* Back Button */}
                 <TouchableOpacity
                     style={styles.backBtn}
                     onPress={() => navigation.goBack()}
@@ -36,31 +77,36 @@ export function LoginScreen() {
             </View>
 
             <View style={styles.card}>
-                {/* Title DANS le card */}
                 <Text style={styles.title1}>Connexion</Text>
 
-                {/* EMAIL FIELD avec label flottant */}
                 <View style={styles.fieldContainer}>
                     <Text style={styles.fieldLabel}>Email</Text>
                     <TextInput
                         placeholder="kristin@example.com"
                         style={styles.input}
                         placeholderTextColor="#ccc"
+                        value={email}
+                        onChangeText={setEmail}
+                        autoCapitalize="none"
+                        keyboardType="email-address"
                     />
                 </View>
 
-                {/* PASSWORD FIELD avec label flottant */}
                 <View style={styles.passwordContainer}>
                     <View style={styles.passwordLabelContainer}>
                         <Text style={styles.passwordLabel}>Mot de passe</Text>
                     </View>
+
                     <View style={styles.passwordInputContainer}>
                         <TextInput
                             placeholder="••••••••••"
                             secureTextEntry={secure}
                             style={styles.passwordInput}
                             placeholderTextColor="#ccc"
+                            value={password}
+                            onChangeText={setPassword}
                         />
+
                         <TouchableOpacity onPress={() => setSecure(!secure)}>
                             <Ionicons
                                 name={secure ? "eye-off" : "eye"}
@@ -71,7 +117,6 @@ export function LoginScreen() {
                     </View>
                 </View>
 
-                {/* Remember Me + Forgot Password */}
                 <View style={styles.checkboxRow}>
                     <TouchableOpacity
                         style={styles.checkboxContainer}
@@ -84,52 +129,50 @@ export function LoginScreen() {
                             ]}
                         >
                             {rememberMe && (
-                                <MaterialIcons
-                                    name="check"
-                                    size={14}
-                                    color="#fff"
-                                />
+                                <MaterialIcons name="check" size={14} color="#fff" />
                             )}
                         </View>
+
                         <Text style={styles.checkboxText}>Se souvenir de moi</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity>
-                        <Text style={styles.forgotPassword}>
-                            Mot de passe oublier?
-                        </Text>
+                        <Text style={styles.forgotPassword}>Mot de passe oublié?</Text>
                     </TouchableOpacity>
                 </View>
 
-                {/* Sign In Button */}
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Se conncter</Text>
+                {/* Message d'erreur venant du frontend ou de l'API */}
+                {error ? (
+                    <Text style={{ color: "red", marginBottom: 10 }}>{error}</Text>
+                ) : null}
+
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleLogin}
+                    disabled={loading}
+                >
+                    {loading ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <Text style={styles.buttonText}>Se connecter</Text>
+                    )}
                 </TouchableOpacity>
 
-                {/* Separator */}
                 <View style={styles.separator}>
                     <View style={styles.line} />
-                    <Text style={styles.orText}>Se connceter avec</Text>
+                    <Text style={styles.orText}>Se connecter avec</Text>
                     <View style={styles.line} />
                 </View>
 
-                {/* Social Icons */}
                 <View style={styles.socialRow}>
-                    {/* Facebook */}
                     <TouchableOpacity style={styles.circleBtn}>
-                        <MaterialIcons
-                            name="facebook"
-                            size={20}
-                            color="#1877F2"
-                        />
+                        <MaterialIcons name="facebook" size={20} color="#1877F2" />
                     </TouchableOpacity>
 
-                    {/* Twitter */}
                     <TouchableOpacity style={styles.circleBtn}>
                         <FontAwesome name="twitter" size={20} color="#1DA1F2" />
                     </TouchableOpacity>
 
-                    {/* Google */}
                     <TouchableOpacity style={styles.circleBtn}>
                         <Image
                             source={require("../../../assets/images/6.png")}
@@ -137,19 +180,16 @@ export function LoginScreen() {
                         />
                     </TouchableOpacity>
 
-                    {/* Apple */}
                     <TouchableOpacity style={styles.circleBtn}>
                         <MaterialIcons name="apple" size={20} color="#000" />
                     </TouchableOpacity>
                 </View>
 
-                {/* Signup Link */}
                 <View style={styles.signupRow}>
-                    <Text style={styles.signupText}>
-                        Avez vous un compte?
-                    </Text>
+                    <Text style={styles.signupText}>Vous n'avez pas de compte?</Text>
+
                     <TouchableOpacity onPress={() => navigation.navigate("signup")}>
-                        <Text style={styles.signupLink}>Créer un copte</Text>
+                        <Text style={styles.signupLink}>Créer un compte</Text>
                     </TouchableOpacity>
                 </View>
             </View>

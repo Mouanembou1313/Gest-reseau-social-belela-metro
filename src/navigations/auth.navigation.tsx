@@ -11,17 +11,35 @@ export type AuthStackParamList = {
   signup: undefined;
 };
 
+type AuthNavigationProps = {
+  onLoginSuccess: () => void;
+  onRegisterSuccess: () => void;
+};
+
 const Stack = createStackNavigator<AuthStackParamList>();
 
-export function AuthNavigation() {
+export function AuthNavigation({
+  onLoginSuccess,
+  onRegisterSuccess,
+}: AuthNavigationProps) {
   return (
     <Stack.Navigator
       initialRouteName="welcome"
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen name="welcome" component={WelcomeScreen} />
-      <Stack.Screen name="signin" component={LoginScreen} />
-      <Stack.Screen name="signup" component={RegisterScreen} />
+
+      <Stack.Screen name="signin">
+        {(props) => (
+          <LoginScreen {...props} onLoginSuccess={onLoginSuccess} />
+        )}
+      </Stack.Screen>
+
+      <Stack.Screen name="signup">
+        {(props) => (
+          <RegisterScreen {...props} onRegisterSuccess={onRegisterSuccess} />
+        )}
+      </Stack.Screen>
     </Stack.Navigator>
   );
 }
