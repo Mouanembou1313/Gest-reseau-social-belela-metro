@@ -7,6 +7,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { AuthNavigation } from "./auth.navigation";
 import { TabNavigation } from "./tab.navigation";
 import { OnboardingScreen } from "../screens/standalone/onboarding/onboarding.screen";
+import { LoadingScreen } from "../screens/standalone/loading/loading.screen";
 
 import { PostScreen } from "../screens/menu/post/post.screen";
 import { LikeScreen } from "../screens/menu/notification/Like/like.screen";
@@ -16,6 +17,7 @@ import { RequestScreen } from "../screens/menu/notification/request/request.scre
 export type AppStackParamList = {
   auth: undefined;
   onboarding: undefined;
+  loading: undefined;
   main: undefined;
 
   like: undefined;
@@ -84,11 +86,11 @@ export function AppNavigation() {
             <AuthNavigation
               {...props}
               onLoginSuccess={() => {
-                // Connexion normale : on va directement à Home via main
-                props.navigation.replace("main");
+                // Connexion normale : chargement puis Home
+                props.navigation.replace("loading");
               }}
               onRegisterSuccess={() => {
-                // Inscription : on affiche d'abord l'onboarding
+                // Inscription : onboarding d'abord
                 props.navigation.replace("onboarding");
               }}
             />
@@ -99,7 +101,18 @@ export function AppNavigation() {
           {(props) => (
             <OnboardingScreen
               onFinish={() => {
-                // Bouton "Commencer" : on ouvre l'application principale
+                // Après onboarding : chargement puis Home
+                props.navigation.replace("loading");
+              }}
+            />
+          )}
+        </Stack.Screen>
+
+        <Stack.Screen name="loading">
+          {(props) => (
+            <LoadingScreen
+              onFinish={() => {
+                // Après la jauge : Home
                 props.navigation.replace("main");
               }}
             />

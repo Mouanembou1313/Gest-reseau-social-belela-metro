@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "217649577308",
+    "project_id": "gest-belela-7668d",
+    "storage_bucket": "gest-belela-7668d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:217649577308:android:335bc36680be74b6791599",
+        "android_client_info": {
+          "package_name": "com.belela"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMnkxQZ9qNs1jiPq0zz4WaDYZn-5YZd9I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

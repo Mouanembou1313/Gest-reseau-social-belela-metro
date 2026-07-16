@@ -1,83 +1,168 @@
 import React, { useState } from "react";
 import {
+    ActivityIndicator,
     Image,
     ImageBackground,
-    View,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
     Text,
     TextInput,
     TouchableOpacity,
-    ScrollView,
-    ActivityIndicator,
+    View,
 } from "react-native";
-import { styles } from "./register.style";
 import { useNavigation } from "@react-navigation/native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
-// Service qui appelle ton API Node.js
-import { registerUser } from "../../../services/service.authService";
+import { styles } from "./register.style";
+import { registerUser } from "../../../services/auth.service";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { loginWithGoogleToken } from "../../../services/authSocial.service";
 
-export function RegisterScreen({
-    onRegisterSuccess,
-}: {
+type RegisterScreenProps = {
     onRegisterSuccess: () => void;
-}) {
+};
+
+export function RegisterScreen({ onRegisterSuccess }: RegisterScreenProps) {
     const navigation = useNavigation<any>();
 
-    // Afficher / masquer les mots de passe
     const [securePassword, setSecurePassword] = useState(true);
     const [secureConfirm, setSecureConfirm] = useState(true);
-
-    // Case à cocher des conditions
     const [agreedTerms, setAgreedTerms] = useState(false);
 
-    // Champs du formulaire
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
-    // Etats d'interface
+    const [usernameError, setUsernameError] = useState("");
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+    const [confirmPasswordError, setConfirmPasswordError] = useState("");
+    const [termsError, setTermsError] = useState("");
+    const [globalError, setGlobalError] = useState("");
+
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
 
-    // Fonction appelée quand l'utilisateur clique sur "Sign up"
+    const isValidEmail = (value: string) => {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+    };
+
+    const validatePassword = (value: string) => {
+        if (value.length < 8) {
+            return "Le mot de passe doit contenir au moins 8 caractères.";
+        }
+
+        if (!/[A-Za-z]/.test(value)) {
+            return "Le mot de passe doit contenir au moins une lettre.";
+        }
+
+        if (!/[0-9]/.test(value)) {
+            return "Le mot de passe doit contenir au moins un chiffre.";
+        }
+
+        return "";
+    };
+
+    const validateForm = () => {
+        let isValid = true;
+
+        setUsernameError("");
+        setEmailError("");
+        setPasswordError("");
+        setConfirmPasswordError("");
+        setTermsError("");
+        setGlobalError("");
+
+        if (!username.trim()) {
+            setUsernameError("Le nom utilisateur est obligatoire.");
+            isValid = false;
+        } else if (username.trim().length < 3) {
+            setUsernameError("Le nom utilisateur doit contenir au moins 3 caractères.");
+            isValid = false;
+        }
+
+        if (!email.trim()) {
+            setEmailError("L'adresse email est obligatoire.");
+            isValid = false;
+        } else if (!isValidEmail(email)) {
+            setEmailError("Adresse email invalide. Exemple : nom@email.com");
+            isValid = false;
+        }
+
+        const passwordValidation = validatePassword(password);
+        if (!password) {
+            setPasswordError("Le mot de passe est obligatoire.");
+            isValid = false;
+        } else if (passwordValidation) {
+            setPasswordError(passwordValidation);
+            isValid = false;
+        }
+
+        if (!confirmPassword) {
+            setConfirmPasswordError("Veuillez confirmer votre mot de passe.");
+            isValid = false;
+        } else if (password !== confirmPassword) {
+            setConfirmPasswordError("Les mots de passe ne correspondent pas.");
+            isValid = false;
+        }
+
+        if (!agreedTerms) {
+            setTermsError("Veuillez accepter les conditions d'utilisation.");
+            isValid = false;
+        }
+
+        return isValid;
+    };
+
     const handleRegister = async () => {
+        if (!validateForm()) return;
+
         try {
-            setError("");
-
-            // Validations simples côté frontend
-            if (!username.trim() || !email.trim() || !password || !confirmPassword) {
-                setError("Veuillez remplir tous les champs.");
-                return;
-            }
-
-            if (password.length < 6) {
-                setError("Le mot de passe doit contenir au moins 6 caractères.");
-                return;
-            }
-
-            if (password !== confirmPassword) {
-                setError("Les mots de passe ne correspondent pas.");
-                return;
-            }
-
-            if (!agreedTerms) {
-                setError("Veuillez accepter les conditions.");
-                return;
-            }
-
             setLoading(true);
 
-            // Appel API : POST /register
-            await registerUser(username.trim(), email.trim(), password);
+            await registerUser(username.trim(), email.trim().toLowerCase(), password);
 
-            // Après inscription réussie, va vers ton écran principal.
-            // Remplace "home" par le vrai nom de ta navigation principale si besoin.
+            // Inscription reussie : AppNavigation affiche onboarding puis loading puis home
             onRegisterSuccess();
         } catch (err: any) {
-            setError(err.message || "Une erreur est survenue pendant l'inscription.");
+            setGlobalError(
+                err.message || "Inscription impossible. Veuillez réessayer."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+    const handleGoogleRegister = async () => {
+        try {
+            setGlobalError("");
+            setLoading(true);
+
+            await GoogleSignin.hasPlayServices({
+                showPlayServicesUpdateDialog: true,
+            });
+
+            const signInResponse = await GoogleSignin.signIn();
+
+            // Si l'utilisateur ferme la fenêtre Google sans choisir de compte
+            if (signInResponse.type === "cancelled") {
+                return;
+            }
+
+            const idToken = signInResponse.data.idToken;
+
+            if (!idToken) {
+                setGlobalError("Token Google introuvable.");
+                return;
+            }
+
+            await loginWithGoogleToken(idToken);
+
+            onRegisterSuccess();
+        } catch (err: any) {
+            setGlobalError(err.message || "Connexion Google impossible.");
         } finally {
             setLoading(false);
         }
@@ -89,174 +174,232 @@ export function RegisterScreen({
             style={styles.container}
             resizeMode="cover"
         >
-            <View style={styles.top}>
-                <TouchableOpacity
-                    style={styles.backBtn}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Text style={styles.backIcon}>‹</Text>
-                    <Text style={styles.backText}>Retour</Text>
-                </TouchableOpacity>
-            </View>
-
-            <ScrollView
-                style={styles.card}
-                showsVerticalScrollIndicator={false}
-                nestedScrollEnabled={true}
+            <KeyboardAvoidingView
+                style={styles.keyboardView}
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
             >
-                <Text style={styles.title}>Créer un compte</Text>
-
-                <View style={styles.fieldContainer}>
-                    <Text style={styles.fieldLabel}>Nom utilisateur</Text>
-                    <TextInput
-                        placeholder="John Doe"
-                        style={styles.input}
-                        placeholderTextColor="#ccc"
-                        value={username}
-                        onChangeText={setUsername}
-                    />
-                </View>
-
-                <View style={styles.fieldContainer}>
-                    <Text style={styles.fieldLabel}>Email</Text>
-                    <TextInput
-                        placeholder="kristin@example.com"
-                        style={styles.input}
-                        placeholderTextColor="#ccc"
-                        value={email}
-                        onChangeText={setEmail}
-                        autoCapitalize="none"
-                        keyboardType="email-address"
-                    />
-                </View>
-
-                <View style={styles.passwordContainer}>
-                    <View style={styles.passwordLabelContainer}>
-                        <Text style={styles.passwordLabel}>Mot de passe</Text>
-                    </View>
-
-                    <View style={styles.passwordInputContainer}>
-                        <TextInput
-                            placeholder="••••••••••"
-                            secureTextEntry={securePassword}
-                            style={styles.passwordInput}
-                            placeholderTextColor="#ccc"
-                            value={password}
-                            onChangeText={setPassword}
-                        />
-
-                        <TouchableOpacity
-                            onPress={() => setSecurePassword(!securePassword)}
-                        >
-                            <Ionicons
-                                name={securePassword ? "eye-off" : "eye"}
-                                size={20}
-                                color="#888"
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
-                <View style={styles.passwordContainer}>
-                    <View style={styles.passwordLabelContainer}>
-                        <Text style={styles.passwordLabel}>Confirmer le mot de passe</Text>
-                    </View>
-
-                    <View style={styles.passwordInputContainer}>
-                        <TextInput
-                            placeholder="••••••••••"
-                            secureTextEntry={secureConfirm}
-                            style={styles.passwordInput}
-                            placeholderTextColor="#ccc"
-                            value={confirmPassword}
-                            onChangeText={setConfirmPassword}
-                        />
-
-                        <TouchableOpacity onPress={() => setSecureConfirm(!secureConfirm)}>
-                            <Ionicons
-                                name={secureConfirm ? "eye-off" : "eye"}
-                                size={20}
-                                color="#888"
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
-                <View style={styles.checkboxRow}>
+                <View style={styles.top}>
                     <TouchableOpacity
-                        style={styles.checkboxContainer}
-                        onPress={() => setAgreedTerms(!agreedTerms)}
+                        style={styles.backBtn}
+                        onPress={() => navigation.goBack()}
                     >
+                        <Text style={styles.backIcon}>‹</Text>
+                        <Text style={styles.backText}>Retour</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <ScrollView
+                    style={styles.card}
+                    contentContainerStyle={styles.cardContent}
+                    showsVerticalScrollIndicator={false}
+                    persistentScrollbar={false}
+                    keyboardShouldPersistTaps="handled"
+                    bounces={false}
+                >
+                    <Text style={styles.title}>Créer un compte</Text>
+                    <Text style={styles.subtitle}>
+                        Rejoins Belela et commence à partager tes moments.
+                    </Text>
+
+                    <View style={styles.fieldContainer}>
+                        <Text style={styles.fieldLabel}>Nom utilisateur</Text>
+                        <View
+                            style={[styles.inputWrapper, usernameError && styles.inputError]}
+                        >
+                            <Ionicons name="person-outline" size={20} color="#8A94A6" />
+                            <TextInput
+                                placeholder="John Doe"
+                                style={styles.input}
+                                placeholderTextColor="#B9C0CC"
+                                value={username}
+                                onChangeText={(value) => {
+                                    setUsername(value);
+                                    setUsernameError("");
+                                    setGlobalError("");
+                                }}
+                            />
+                        </View>
+                        {usernameError ? (
+                            <Text style={styles.errorText}>{usernameError}</Text>
+                        ) : null}
+                    </View>
+
+                    <View style={styles.fieldContainer}>
+                        <Text style={styles.fieldLabel}>Email</Text>
+                        <View style={[styles.inputWrapper, emailError && styles.inputError]}>
+                            <Ionicons name="mail-outline" size={20} color="#8A94A6" />
+                            <TextInput
+                                placeholder="kristin@example.com"
+                                style={styles.input}
+                                placeholderTextColor="#B9C0CC"
+                                value={email}
+                                onChangeText={(value) => {
+                                    setEmail(value);
+                                    setEmailError("");
+                                    setGlobalError("");
+                                }}
+                                autoCapitalize="none"
+                                keyboardType="email-address"
+                            />
+                        </View>
+                        {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+                    </View>
+
+                    <View style={styles.passwordContainer}>
+                        <Text style={styles.fieldLabel}>Mot de passe</Text>
                         <View
                             style={[
-                                styles.checkbox,
-                                agreedTerms && styles.checkboxChecked,
+                                styles.passwordInputContainer,
+                                passwordError && styles.inputError,
                             ]}
                         >
-                            {agreedTerms && (
-                                <MaterialIcons name="check" size={14} color="#fff" />
-                            )}
+                            <Ionicons name="lock-closed-outline" size={20} color="#8A94A6" />
+                            <TextInput
+                                placeholder="Minimum 8 caractères"
+                                secureTextEntry={securePassword}
+                                style={styles.passwordInput}
+                                placeholderTextColor="#B9C0CC"
+                                value={password}
+                                onChangeText={(value) => {
+                                    setPassword(value);
+                                    setPasswordError("");
+                                    setConfirmPasswordError("");
+                                    setGlobalError("");
+                                }}
+                            />
+                            <TouchableOpacity
+                                onPress={() => setSecurePassword(!securePassword)}
+                            >
+                                <Ionicons
+                                    name={securePassword ? "eye-off-outline" : "eye-outline"}
+                                    size={21}
+                                    color="#8A94A6"
+                                />
+                            </TouchableOpacity>
                         </View>
-
-                        <Text style={styles.checkboxText}>
-                            J'accepte les conditions d'utilisation
+                        <Text style={styles.helperText}>
+                            Au moins 8 caractères, une lettre et un chiffre.
                         </Text>
+                        {passwordError ? (
+                            <Text style={styles.errorText}>{passwordError}</Text>
+                        ) : null}
+                    </View>
+
+                    <View style={styles.passwordContainer}>
+                        <Text style={styles.fieldLabel}>Confirmer le mot de passe</Text>
+                        <View
+                            style={[
+                                styles.passwordInputContainer,
+                                confirmPasswordError && styles.inputError,
+                            ]}
+                        >
+                            <Ionicons name="shield-checkmark-outline" size={20} color="#8A94A6" />
+                            <TextInput
+                                placeholder="Répéter le mot de passe"
+                                secureTextEntry={secureConfirm}
+                                style={styles.passwordInput}
+                                placeholderTextColor="#B9C0CC"
+                                value={confirmPassword}
+                                onChangeText={(value) => {
+                                    setConfirmPassword(value);
+                                    setConfirmPasswordError("");
+                                    setGlobalError("");
+                                }}
+                            />
+                            <TouchableOpacity onPress={() => setSecureConfirm(!secureConfirm)}>
+                                <Ionicons
+                                    name={secureConfirm ? "eye-off-outline" : "eye-outline"}
+                                    size={21}
+                                    color="#8A94A6"
+                                />
+                            </TouchableOpacity>
+                        </View>
+                        {confirmPasswordError ? (
+                            <Text style={styles.errorText}>{confirmPasswordError}</Text>
+                        ) : null}
+                    </View>
+
+                    <View style={styles.checkboxRow}>
+                        <TouchableOpacity
+                            style={styles.checkboxContainer}
+                            onPress={() => {
+                                setAgreedTerms(!agreedTerms);
+                                setTermsError("");
+                            }}
+                        >
+                            <View
+                                style={[
+                                    styles.checkbox,
+                                    agreedTerms && styles.checkboxChecked,
+                                    termsError && styles.checkboxError,
+                                ]}
+                            >
+                                {agreedTerms && (
+                                    <MaterialIcons name="check" size={14} color="#fff" />
+                                )}
+                            </View>
+                            <Text style={styles.checkboxText}>
+                                J'accepte les conditions d'utilisation
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {termsError ? <Text style={styles.errorText}>{termsError}</Text> : null}
+
+                    {globalError ? (
+                        <View style={styles.errorBox}>
+                            <Ionicons name="alert-circle-outline" size={18} color="#EF4444" />
+                            <Text style={styles.errorBoxText}>{globalError}</Text>
+                        </View>
+                    ) : null}
+
+                    <TouchableOpacity
+                        style={[styles.button, loading && styles.buttonDisabled]}
+                        onPress={handleRegister}
+                        disabled={loading}
+                        activeOpacity={0.85}
+                    >
+                        {loading ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <Text style={styles.buttonText}>Créer mon compte</Text>
+                        )}
                     </TouchableOpacity>
-                </View>
 
-                {/* Message d'erreur venant du frontend ou de l'API */}
-                {error ? (
-                    <Text style={{ color: "red", marginBottom: 10 }}>{error}</Text>
-                ) : null}
+                    <View style={styles.separator}>
+                        <View style={styles.line} />
+                        <Text style={styles.orText}>S'inscrire avec</Text>
+                        <View style={styles.line} />
+                    </View>
 
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={handleRegister}
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <ActivityIndicator color="#fff" />
-                    ) : (
-                        <Text style={styles.buttonText}>S'inscrire</Text>
-                    )}
-                </TouchableOpacity>
+                    <View style={styles.socialRow}>
+                        <TouchableOpacity style={styles.circleBtn}>
+                            <MaterialIcons name="facebook" size={23} color="#1877F2" />
+                        </TouchableOpacity>
 
-                <View style={styles.separator}>
-                    <View style={styles.line} />
-                    <Text style={styles.orText}>S'inscrire avec</Text>
-                    <View style={styles.line} />
-                </View>
+                        <TouchableOpacity style={styles.circleBtn}>
+                            <FontAwesome name="twitter" size={22} color="#1DA1F2" />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.circleBtn} onPress={handleGoogleRegister}>
+                            <Image
+                                source={require("../../../assets/images/6.png")}
+                                style={styles.icon}
+                            />
+                        </TouchableOpacity>
 
-                <View style={styles.socialRow}>
-                    <TouchableOpacity style={styles.circleBtn}>
-                        <MaterialIcons name="facebook" size={24} color="#1877F2" />
-                    </TouchableOpacity>
+                        <TouchableOpacity style={styles.circleBtn}>
+                            <MaterialIcons name="apple" size={24} color="#111827" />
+                        </TouchableOpacity>
+                    </View>
 
-                    <TouchableOpacity style={styles.circleBtn}>
-                        <FontAwesome name="twitter" size={24} color="#1DA1F2" />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.circleBtn}>
-                        <Image
-                            source={require("../../../assets/images/6.png")}
-                            style={styles.icon}
-                        />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.circleBtn}>
-                        <MaterialIcons name="apple" size={24} color="#000" />
-                    </TouchableOpacity>
-                </View>
-
-                <View style={styles.loginRow}>
-                    <Text style={styles.loginText}>Vous avez déjà un compte?</Text>
-
-                    {/* Dans ton AuthNavigation, l'écran login s'appelle "signin" */}
-                    <TouchableOpacity onPress={() => navigation.navigate("signin")}>
-                        <Text style={styles.loginLink}>Se connecter</Text>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
+                    <View style={styles.loginRow}>
+                        <Text style={styles.loginText}>Vous avez déjà un compte?</Text>
+                        <TouchableOpacity onPress={() => navigation.navigate("signin")}>
+                            <Text style={styles.loginLink}>Se connecter</Text>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </ImageBackground>
     );
 }
