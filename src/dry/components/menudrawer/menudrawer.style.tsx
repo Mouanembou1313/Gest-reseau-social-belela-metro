@@ -1,103 +1,59 @@
-import { StyleSheet, Dimensions } from "react-native";
-
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const DRAWER_WIDTH = SCREEN_WIDTH * 0.75;
-
+import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
-    overlay: {
-        ...StyleSheet.absoluteFillObject,
-        flexDirection: "row",
-        height: 1000,
-        justifyContent: "flex-end", // 👉 drawer collé à droite
-    },
-
-    backdrop: {
-        height: 1000,
-        flex: 1,
-        backgroundColor: "rgba(0,0,0,0.35)",
-    },
-
-    drawer: {
-        width: DRAWER_WIDTH,
-        backgroundColor: "#fff",
-        padding: 60,
-        shadowColor: "#000",
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        elevation: 5,
-    },
-
-    title: {
-        fontSize: 20,
-        fontWeight: "bold",
-        marginBottom: 4,
-    },
-
-    email: {
-        color: "#888",
-        marginBottom: 25,
-    },
-
-    item: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 18,
-    },
-
-    text: {
-        marginLeft: 10,
-        fontSize: 16,
-    },
-
-    logout: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 30,
-        backgroundColor: "#84f76d",
-        padding: 12,
-        borderRadius: 8,
-      
-    },
-
-    logoutText: {
-        marginLeft: 10,
-        color: "#fff",
-        fontWeight: "bold",
-
-    },
-    profileCard: {
-
-        borderRadius: 20,
-        padding: 5,
-        // padding: 25,
-        alignItems: 'center',
-        marginBottom: 18,
-        // marginBottom: 20,
-
-
-    },
-
-    avatar: {
-        width: 100,
-        // width: 120,
-        height: 100,
-        // height: 120,
-        borderRadius: 60,
-        marginBottom: 15,
-        borderWidth: 3,
-        borderColor: '#5dade2',
-    },
-
-    name: {
-        fontSize: 19,
-        // fontSize: 22,
-        fontWeight: 'bold',
-        color: '#5dade2',
-    },
-
-    lettre: {
-        fontSize: 14,
-        color: '#555',
-    },
-
+  overlay: { flex: 1, alignItems: 'flex-end' },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(22, 32, 46, 0.32)',
+  },
+  drawer: { height: '100%', backgroundColor: '#fff' },
+  safe: { flex: 1 },
+  content: { paddingHorizontal: 24, paddingBottom: 24, flexGrow: 1 },
+  heading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    marginBottom: 20,
+  },
+  brand: { color: '#6dc2f7', fontSize: 24, fontWeight: '800' },
+  close: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profile: {
+    alignItems: 'flex-start',
+    gap: 10,
+    paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eaf0f6',
+  },
+  name: { color: '#202632', fontSize: 18, fontWeight: '700' },
+  email: { color: '#798598', fontSize: 12 },
+  links: { paddingVertical: 16 },
+  item: { minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  icon: {
+    width: 38,
+    height: 38,
+    backgroundColor: '#eff7ff',
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  text: { flex: 1, color: '#526176', fontSize: 14, fontWeight: '500' },
+  logout: {
+    marginTop: 'auto',
+    minHeight: 50,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#dcecf8',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  logoutText: { color: '#3b5bdb', fontSize: 14, fontWeight: '600' },
+  error: { color: '#c43a4e', fontSize: 13, paddingVertical: 12 },
+  disabled: { opacity: 0.45 },
 });

@@ -1,88 +1,158 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from 'react';
 import {
-    View,
-    Text, Image,
-    TouchableOpacity,
-    Animated,
-    Dimensions,
-    Pressable,
-} from "react-native";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import { styles } from "./menudrawer.style";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from '@react-navigation/native';
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const DRAWER_WIDTH = SCREEN_WIDTH * 0.75;
+  ActivityIndicator,
+  Animated,
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  NavigationProp,
+  ParamListBase,
+  useNavigation,
+} from '@react-navigation/native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { getCurrentUser } from '../../../services/auth.service';
+import { AccountUser } from '../../../services/social.service';
+import { useLogout } from '../../../navigations/useLogout';
+import { SocialAvatar } from '../../../screens/menu/home/components/socialAvatar.component';
+import { styles as s } from './menudrawer.style';
 
-type Props = {
-    visible: boolean;
-    onClose: () => void;
-};
-
-export const MenuDrawer = ({ visible, onClose }: Props) => {
-    const navigation = useNavigation<any>();
-
-    const goTo = (screen: string) => {
-        onClose();
-        navigation.navigate(screen);
+type Props = { visible: boolean; onClose: () => void };
+const links = [
+  { screen: 'home', label: 'Accueil', icon: 'home' },
+  { screen: 'search', label: 'Rechercher des amis', icon: 'search' },
+  {
+    screen: 'notification',
+    label: 'Notifications',
+    icon: 'notifications-none',
+  },
+  { screen: 'account', label: 'Mon compte', icon: 'person-outline' },
+];
+export function MenuDrawer({ visible, onClose }: Props) {
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
+  const { width } = useWindowDimensions();
+  const drawerWidth = Math.min(width * 0.86, 360);
+  const slide = useRef(new Animated.Value(drawerWidth)).current;
+  const [user, setUser] = useState<AccountUser | null>(null);
+  const { logout, busy, error } = useLogout();
+  useEffect(() => {
+    let alive = true;
+    if (visible) {
+      slide.setValue(drawerWidth);
+      Animated.timing(slide, {
+        toValue: 0,
+        duration: 220,
+        useNativeDriver: true,
+      }).start();
+      getCurrentUser()
+        .then(profile => {
+          if (alive) setUser(profile);
+        })
+        .catch(() => {});
+    }
+    return () => {
+      alive = false;
+      slide.stopAnimation();
     };
-    // 👉 démarre hors écran à droite
-    const slideAnim = useRef(new Animated.Value(DRAWER_WIDTH)).current;
-
-    useEffect(() => {
-        Animated.timing(slideAnim, {
-            toValue: visible ? 0 : DRAWER_WIDTH,
-            duration: 250,
-            useNativeDriver: true,
-        }).start();
-    }, [visible, slideAnim]);
-
-    if (!visible) return null;
-
-
-    return (
-        <SafeAreaView style={styles.overlay}>
-            {/* Drawer */}
-            <Animated.View
-                style={[
-                    styles.drawer,
-                    { transform: [{ translateX: slideAnim }] },
-                ]}
-            >
-                {/* PROFILE CARD */}
-                <View style={styles.profileCard}>
-                    <Image
-                        source={{ uri: 'https://i.pravatar.cc/300' }}
-                        style={styles.avatar}
+  }, [visible, drawerWidth, slide]);
+  function goTo(screen: string) {
+    onClose();
+    navigation.navigate('main', { screen });
+  }
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      onRequestClose={() => {
+        if (!busy) onClose();
+      }}
+    >
+      <View style={s.overlay}>
+        <Pressable
+          style={s.backdrop}
+          onPress={onClose}
+          accessibilityLabel="Fermer le menu"
+        />
+        <Animated.View
+          style={[
+            s.drawer,
+            { width: drawerWidth, transform: [{ translateX: slide }] },
+          ]}
+        >
+          <SafeAreaView style={s.safe} edges={['top', 'right', 'bottom']}>
+            <ScrollView contentContainerStyle={s.content}>
+              <View style={s.heading}>
+                <Text style={s.brand}>Belela</Text>
+                <TouchableOpacity
+                  style={s.close}
+                  onPress={onClose}
+                  accessibilityLabel="Fermer"
+                >
+                  <MaterialIcons name="close" size={24} color="#526176" />
+                </TouchableOpacity>
+              </View>
+              <View style={s.profile}>
+                <SocialAvatar
+                  name={user?.username}
+                  uri={user?.profilePic}
+                  size={64}
+                />
+                <Text style={s.name} numberOfLines={2}>
+                  {user?.username || 'Votre compte'}
+                </Text>
+                {!!user?.email && (
+                  <Text style={s.email} numberOfLines={2}>
+                    {user.email}
+                  </Text>
+                )}
+              </View>
+              <View style={s.links}>
+                {links.map(item => (
+                  <TouchableOpacity
+                    key={item.screen}
+                    style={s.item}
+                    onPress={() => goTo(item.screen)}
+                  >
+                    <View style={s.icon}>
+                      <MaterialIcons
+                        name={item.icon}
+                        size={20}
+                        color="#6dc2f7"
+                      />
+                    </View>
+                    <Text style={s.text}>{item.label}</Text>
+                    <MaterialIcons
+                      name="chevron-right"
+                      size={20}
+                      color="#a1abba"
                     />
-                    <Text style={styles.name}>John Doe</Text>
-                    <Text style={styles.lettre}>johndoe@example.com</Text>
-                </View>
-
-                {/* 🔎 Rechercher amis */}
-                <TouchableOpacity style={styles.item} onPress={() => goTo("search")}>
-                    <MaterialIcons name="search" size={22} color="#333" />
-                    <Text style={styles.text}>Rechercher des amis</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.item} onPress={() => goTo("notification")}>
-                    <MaterialIcons name="notifications" size={22} color="#333" />
-                    <Text style={styles.text}>Notifications</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.item} onPress={() => goTo("account")}>
-                    <MaterialIcons name="person" size={22} color="#333" />
-                    <Text style={styles.text}>Mon profil</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.logout}>
-                    <MaterialIcons name="logout" size={22} color="#fff" />
-                    <Text style={styles.logoutText}>Se déconnecter</Text>
-                </TouchableOpacity>
-            </Animated.View>
-
-            {/* Fond sombre */}
-            <Pressable style={styles.backdrop} onPress={onClose} />
-        </SafeAreaView>
-    );
-};
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {!!error && <Text style={s.error}>{error}</Text>}
+              <TouchableOpacity
+                disabled={busy}
+                style={[s.logout, busy && s.disabled]}
+                onPress={logout}
+              >
+                {busy ? (
+                  <ActivityIndicator color="#3b5bdb" />
+                ) : (
+                  <MaterialIcons name="logout" size={20} color="#3b5bdb" />
+                )}
+                <Text style={s.logoutText}>Se déconnecter</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </SafeAreaView>
+        </Animated.View>
+      </View>
+    </Modal>
+  );
+}

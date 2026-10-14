@@ -1,114 +1,110 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from 'react';
 import {
-    View,
-    Text,
-    ImageBackground,
-    TouchableOpacity,
-} from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
+  ImageBackground,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { styles as s } from './onboarding.style';
 
-import { styles } from "./onboarding.style";
-
-// Slides affichées dans l'onboarding
 const slides = [
-    {
-        title: "Bienvenue sur Belela",
-        description:
-            "Découvre un espace social pensé pour partager, échanger et rester proche de ta communauté.",
-        icon: "people-outline",
-    },
-    {
-        title: "Publie tes moments",
-        description:
-            "Partage tes idées, tes photos et tes expériences avec les personnes qui comptent pour toi.",
-        icon: "image-outline",
-    },
-    {
-        title: "Reste connecté",
-        description:
-            "Suis les notifications, les interactions et les nouvelles publications en temps réel.",
-        icon: "notifications-outline",
-    },
+  {
+    title: 'Bienvenue sur Belela',
+    description: 'Votre place, vos liens, votre communauté.',
+    icon: 'people-outline',
+  },
+  {
+    title: 'Des moments à partager',
+    description: 'Les petits instants font les plus belles histoires.',
+    icon: 'photo-library',
+  },
+  {
+    title: 'Plus proches, simplement',
+    description: 'Retrouvez les personnes qui comptent pour vous.',
+    icon: 'favorite-border',
+  },
 ];
-
-type OnboardingScreenProps = {
-    onFinish: () => void;
-};
-
-export function OnboardingScreen({ onFinish }: OnboardingScreenProps) {
-    const [currentIndex, setCurrentIndex] = useState(0);
-
-    const currentSlide = slides[currentIndex];
-    const isLastSlide = currentIndex === slides.length - 1;
-
-    // Passe à la slide suivante ou termine l'onboarding
-    const handleNext = () => {
-        if (isLastSlide) {
-            onFinish();
-            return;
-        }
-
-        setCurrentIndex((prev) => prev + 1);
-    };
-
-    // Permet d'accéder directement à l'application
-    const handleSkip = () => {
-        onFinish();
-    };
-
-    return (
-        <ImageBackground
-            source={require("../../../assets/images/9.jpg")}
-            style={styles.container}
-            resizeMode="cover"
+type Props = { onFinish: () => void };
+export function OnboardingScreen({ onFinish }: Props) {
+  const [index, setIndex] = useState(0);
+  const finished = useRef(false);
+  const slide = slides[index];
+  const last = index === slides.length - 1;
+  function finish() {
+    if (!finished.current) {
+      finished.current = true;
+      onFinish();
+    }
+  }
+  function next() {
+    if (last) finish();
+    else setIndex(value => Math.min(value + 1, slides.length - 1));
+  }
+  return (
+    <SafeAreaView style={s.screen}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <View style={s.header}>
+        <Text style={s.brand}>Belela</Text>
+        <TouchableOpacity
+          style={s.skip}
+          onPress={finish}
+          accessibilityRole="button"
         >
-            <View style={styles.overlay}>
-                <View style={styles.header}>
-                    {!isLastSlide ? (
-                        <TouchableOpacity onPress={handleSkip}>
-                            <Text style={styles.skipText}>Passer</Text>
-                        </TouchableOpacity>
-                    ) : (
-                        <View />
-                    )}
-                </View>
-
-                <View style={styles.content}>
-                    <View style={styles.iconCircle}>
-                        <Ionicons name={currentSlide.icon} size={74} color="#6EC6FF" />
-                    </View>
-
-                    <Text style={styles.title}>{currentSlide.title}</Text>
-
-                    <Text style={styles.description}>{currentSlide.description}</Text>
-
-                    <View style={styles.dotsContainer}>
-                        {slides.map((_, index) => (
-                            <View
-                                key={index}
-                                style={[
-                                    styles.dot,
-                                    currentIndex === index && styles.activeDot,
-                                ]}
-                            />
-                        ))}
-                    </View>
-                </View>
-
-                <View style={styles.footer}>
-                    <TouchableOpacity style={styles.button} onPress={handleNext}>
-                        <Text style={styles.buttonText}>
-                            {isLastSlide ? "Commencer" : "Suivant"}
-                        </Text>
-
-                        <Ionicons
-                            name={isLastSlide ? "checkmark-outline" : "arrow-forward-outline"}
-                            size={22}
-                            color="#fff"
-                        />
-                    </TouchableOpacity>
-                </View>
-            </View>
+          <Text style={s.skipText}>Passer</Text>
+        </TouchableOpacity>
+      </View>
+      <ScrollView
+        contentContainerStyle={s.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <ImageBackground
+          source={require('../../../assets/images/9.jpg')}
+          style={s.image}
+          resizeMode="cover"
+        >
+          <View style={s.imageOverlay} />
+          <MaterialIcons name={slide.icon} size={72} color="#fff" />
         </ImageBackground>
-    );
+        <View style={s.copy}>
+          <Text style={s.step}>
+            {index + 1} / {slides.length}
+          </Text>
+          <Text style={s.title}>{slide.title}</Text>
+          <Text style={s.description}>{slide.description}</Text>
+        </View>
+      </ScrollView>
+      <View style={s.dots}>
+        {slides.map((item, i) => (
+          <TouchableOpacity
+            key={item.title}
+            style={s.dotButton}
+            onPress={() => setIndex(i)}
+            accessibilityRole="button"
+            accessibilityLabel={'Étape ' + (i + 1)}
+            accessibilityState={{ selected: i === index }}
+          >
+            <View style={[s.dot, i === index && s.activeDot]} />
+          </TouchableOpacity>
+        ))}
+      </View>
+      <View style={s.footer}>
+        <TouchableOpacity
+          style={s.button}
+          onPress={next}
+          accessibilityRole="button"
+        >
+          <Text style={s.buttonText}>{last ? 'Commencer' : 'Continuer'}</Text>
+          <MaterialIcons
+            name={last ? 'check' : 'arrow-forward'}
+            size={20}
+            color="#fff"
+          />
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
 }

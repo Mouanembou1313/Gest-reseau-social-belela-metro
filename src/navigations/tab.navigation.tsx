@@ -1,46 +1,61 @@
-import React from 'react'
-import { View, StyleSheet } from 'react-native'
-import { createStackNavigator } from '@react-navigation/stack'
-
-import { FooterComponent } from '../dry/components/footer/footer.component'
-import HomeScreen from '../screens/menu/home/home.screen'
-import { PostScreen } from '../screens/menu/post/post.screen'
-import { AccountScreen } from '../screens/menu/account/account.screen'
+import React from 'react';
+import { StatusBar } from 'react-native';
+import {
+  BottomTabBarProps,
+  createBottomTabNavigator,
+} from '@react-navigation/bottom-tabs';
+import { FooterComponent } from '../dry/components/footer/footer.component';
+import HomeScreen from '../screens/menu/home/home.screen';
+import { PostScreen } from '../screens/menu/post/post.screen';
+import { AccountScreen } from '../screens/menu/account/account.screen';
 import { SearchScreen } from '../screens/menu/search/search.component';
 import { NotificationScreen } from '../screens/menu/notification/notification.screen';
 
-const Stack = createStackNavigator()
+export type MainTabParamList = {
+  home: undefined;
+  post: undefined;
+  account: undefined;
+  search: undefined;
+  notification: undefined;
+};
+const Tabs = createBottomTabNavigator<MainTabParamList>();
 
-export function TabNavigation({ navigation }: { navigation: any }) {
-    return (
-        <View style={styles.container}>
-            <View style={styles.content}>
-                <Stack.Navigator
-                    initialRouteName={"home"}
-                    screenOptions={{ headerShown: false }}
-                >
-                    {/* TAB PRINCIPAL */}
-                    <Stack.Screen name="home" component={HomeScreen} />
-                    <Stack.Screen name="post" component={PostScreen} />
-                    <Stack.Screen name="account" component={AccountScreen} />
-                    {/* 🔥 MENU DRAWER NAVIGATION */}
-                    <Stack.Screen name="notification" component={NotificationScreen} />
-                    <Stack.Screen name="search" component={SearchScreen} />
-
-                </Stack.Navigator>
-            </View>
-
-            <FooterComponent navigation={navigation} />
-        </View>
-    )
+// tabBar est un callback de rendu : les hooks restent dans le composant React.
+function renderFooter(props: BottomTabBarProps) {
+  return <FooterComponent {...props} />;
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f2f4f7',
-    },
-    content: {
-        flex: 1,
-    },
-})
+export function TabNavigation() {
+  return (
+    <>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <Tabs.Navigator
+        initialRouteName="home"
+        backBehavior="history"
+        tabBar={renderFooter}
+        screenOptions={{
+          headerShown: false,
+          sceneStyle: { backgroundColor: '#f6f9fc' },
+        }}
+      >
+        <Tabs.Screen
+          name="home"
+          component={HomeScreen}
+          options={{ title: 'Accueil' }}
+        />
+        <Tabs.Screen
+          name="post"
+          component={PostScreen}
+          options={{ title: 'Publier' }}
+        />
+        <Tabs.Screen
+          name="account"
+          component={AccountScreen}
+          options={{ title: 'Compte' }}
+        />
+        <Tabs.Screen name="search" component={SearchScreen} />
+        <Tabs.Screen name="notification" component={NotificationScreen} />
+      </Tabs.Navigator>
+    </>
+  );
+}

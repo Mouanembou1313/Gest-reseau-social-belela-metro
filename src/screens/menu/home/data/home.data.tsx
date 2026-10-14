@@ -1,9 +1,19 @@
-// Types pour les données
 export type Story = {
   id: string;
+  userId?: string;
+  createdAt?: string;
   name: string;
   img: string;
+  avatar: string;
   isMe?: boolean;
+  type?: "image" | "video" | "text";
+  text?: string;
+  caption?: string;
+  backgroundColor?: string;
+};
+
+export type StoryGroup = Story & {
+  items: Story[];
 };
 
 export type Suggestion = {
@@ -13,22 +23,6 @@ export type Suggestion = {
   mutual: number;
 };
 
-// Stories
-export const storiesData: Story[] = [
-  {
-    id: "me",
-    name: "Votre story",
-    img: "https://i.pravatar.cc/150?img=50",
-    isMe: true,
-  },
-  ...Array.from({ length: 9 }).map((_, i) => ({
-    id: String(i + 1),
-    name: `Ami ${i + 1}`,
-    img: `https://i.pravatar.cc/150?img=${i + 1}`,
-  })),
-];
-
-// Suggestions
 export const suggestionsData: Suggestion[] = [
   { id: 1, name: "Alice Martin", avatar: "https://i.pravatar.cc/100?img=21", mutual: 2 },
   { id: 2, name: "Bob Dupuis", avatar: "https://i.pravatar.cc/100?img=22", mutual: 3 },

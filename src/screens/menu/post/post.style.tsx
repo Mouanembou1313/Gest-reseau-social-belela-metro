@@ -1,126 +1,62 @@
-// src/screens/menu/post/post.style.ts
-
 import { StyleSheet } from 'react-native';
-
 export const styles = StyleSheet.create({
-  /* ===== LAYOUT ===== */
-  container: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-  },
-
-  /* ===== HEADER ===== */
-  header: {
-    height: 56,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e8eaef',
-    backgroundColor: '#fff',
-  },
-
-  headerAction: {
-    color: '#6dc2f7',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  logo: {
-    fontSize: 24,
-    color: '#6dc2f7', // COLORS.primary
-    fontWeight: '800',
-    letterSpacing: 0.3,
-  },
-
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-  },
-
-  headerPublish: {
-    backgroundColor: '#6dc2f7',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 14,
-  },
-
-  headerPublishText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 13,
-  },
-
-  /* ===== CARD ===== */
-  card: {
-    backgroundColor: '#fff',
-    margin: 16,
-    padding: 16,
-    borderRadius: 16,
-
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
-  },
-
-  /* ===== INPUT ===== */
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    marginRight: 12,
-  },
-
+  container: { flex: 1, backgroundColor: '#f6f9fc' },
+  keyboard: { flex: 1 },
+  content: { padding: 20, gap: 20, flexGrow: 1 },
+  heading: { color: '#202632', fontSize: 22, fontWeight: '700' },
+  author: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  authorBody: { flex: 1 },
+  name: { fontSize: 15, fontWeight: '700', color: '#202632' },
+  audience: { fontSize: 12, color: '#748094', marginTop: 4 },
   input: {
-    flex: 1,
-    fontSize: 15,
-    color: '#111827',
-    paddingTop: 6,
+    minHeight: 180,
+    color: '#303745',
+    fontSize: 18,
+    lineHeight: 28,
+    textAlignVertical: 'top',
+    padding: 0,
   },
-
-  /* ===== ACTIONS ===== */
-  actions: {
+  preview: {
+    width: '100%',
+    aspectRatio: 4 / 3,
+    borderRadius: 8,
+    backgroundColor: '#e5edf4',
+  },
+  mediaRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 16,
+    justifyContent: 'space-between',
   },
-
   mediaAction: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+    minHeight: 48,
   },
-
-  mediaText: {
-    marginLeft: 6,
-    fontSize: 14,
-    color: '#6dc2f7',
-    fontWeight: '500',
+  mediaText: { fontSize: 14, color: '#3b5bdb', fontWeight: '600' },
+  remove: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-
+  fileName: { fontSize: 12, color: '#748094' },
+  error: { color: '#c43a4e', fontSize: 13 },
+  footer: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#e5edf4',
+    backgroundColor: '#fff',
+  },
   publishButton: {
-    backgroundColor: '#84f76d',
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 7,
+    minHeight: 52,
+    borderRadius: 8,
+    backgroundColor: '#3b5bdb',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
   },
-
-  publishText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#e5e7eb", // gris clair moderne
-    marginVertical: 12,
-    marginLeft: 60,
-  }
+  publishText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  disabled: { opacity: 0.45 },
 });

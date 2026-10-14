@@ -1,50 +1,32 @@
 import React from 'react';
-import { View, TextInput, Image, TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { launchImageLibrary } from 'react-native-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-
-import { styles } from '../home.style';
 import { AppStackParamList } from '../../../../navigations/app.navigation';
+import { PublicUser } from '../../../../services/social.service';
+import { SocialAvatar } from './socialAvatar.component';
+import { socialStyles as s } from './social.style';
 
-type NavigationProp = StackNavigationProp<AppStackParamList>;
-
-export const PostInputCard = () => {
-    const navigation = useNavigation<NavigationProp>();
-
-    const openGallery = async () => {
-        const result = await launchImageLibrary({
-            mediaType: 'photo',
-            quality: 0.8,
-        });
-
-        if (result.assets?.length) {
-            navigation.navigate('Posts', {
-                image: result.assets[0].uri,
-            });
-        }
-    };
-
-    return (
-        <View style={styles.card}>
-            <View style={styles.postInputRow}>
-                <Image
-                    source={{ uri: 'https://i.pravatar.cc/100?img=11' }}
-                    style={styles.avatar}
-                />
-
-                <TextInput
-                    style={styles.textInput}
-                    placeholder="Exprimez-vous…"
-                    placeholderTextColor="#9aa3b2"
-                    onFocus={() => navigation.navigate('Posts')}
-                />
-
-                <TouchableOpacity style={styles.circleIcon} onPress={openGallery}>
-                    <MaterialIcons name="photo-library" size={20} color="#6dc2f7" />
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
-};
+export function PostInputCard({ user }: { user?: PublicUser | null }) {
+  const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
+  return (
+    <View style={s.composer}>
+      <SocialAvatar name={user?.username} uri={user?.profilePic} />
+      <TouchableOpacity
+        style={s.composerPrompt}
+        onPress={() => navigation.navigate('Posts')}
+        accessibilityLabel="Créer une publication"
+      >
+        <Text style={s.prompt}>Exprimez-vous...</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={s.iconButton}
+        onPress={() => navigation.navigate('Posts', { pickMedia: true })}
+        accessibilityLabel="Publier une photo ou une vidéo"
+      >
+        <MaterialIcons name="add-photo-alternate" size={24} color="#3b5bdb" />
+      </TouchableOpacity>
+    </View>
+  );
+}

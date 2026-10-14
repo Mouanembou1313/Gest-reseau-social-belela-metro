@@ -23,7 +23,7 @@ export type AppStackParamList = {
   like: undefined;
   comment: undefined;
   request: undefined;
-  Posts: { image?: string } | undefined;
+  Posts: { image?: string; pickMedia?: boolean } | undefined;
 };
 
 const Stack = createStackNavigator<AppStackParamList>();

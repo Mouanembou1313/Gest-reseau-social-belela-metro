@@ -1,159 +1,81 @@
-import { StyleSheet } from "react-native";
-
+import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        overflow: "hidden",
-    },
-
-    overlay: {
-        flex: 1,
-        justifyContent: "space-between",
-        backgroundColor: "rgba(15, 23, 42, 0.18)",
-        paddingHorizontal: 24,
-        paddingTop: 76,
-        paddingBottom: 80,
-    },
-
-    hero: {
-        alignItems: "center",
-        paddingHorizontal: 8,
-    },
-
-    badge: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 7,
-        backgroundColor: "rgba(255, 255, 255, 0.92)",
-        borderRadius: 999,
-        paddingHorizontal: 14,
-        paddingVertical: 8,
-        marginBottom: 22,
-        shadowColor: "#1E293B",
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.12,
-        shadowRadius: 14,
-        elevation: 4,
-    },
-
-    badgeText: {
-        color: "#475569",
-        fontSize: 13,
-        fontWeight: "800",
-    },
-
-    title: {
-        color: "#fff",
-        fontSize: 48,
-        fontWeight: "900",
-        textAlign: "center",
-        letterSpacing: 0,
-        textShadowColor: "rgba(15, 23, 42, 0.18)",
-        textShadowOffset: { width: 0, height: 4 },
-        textShadowRadius: 12,
-    },
-
-    subtitle: {
-        color: "#F8FAFC",
-        textAlign: "center",
-        marginTop: 14,
-        fontSize: 16,
-        lineHeight: 24,
-        fontWeight: "600",
-        textShadowColor: "rgba(15, 23, 42, 0.18)",
-        textShadowOffset: { width: 0, height: 2 },
-        textShadowRadius: 8,
-    },
-
-    bottomCard: {
-        width: "100%",
-        backgroundColor: "rgba(255, 255, 255, 0.96)",
-        borderRadius: 30,
-        paddingHorizontal: 22,
-        paddingTop: 26,
-        paddingBottom: 22,
-        shadowColor: "#1E293B",
-        shadowOffset: { width: 0, height: 14 },
-        shadowOpacity: 0.18,
-        shadowRadius: 24,
-        elevation: 10,
-    },
-
-    cardTitle: {
-        color: "#1F2937",
-        fontSize: 22,
-        fontWeight: "900",
-        textAlign: "center",
-        marginBottom: 8,
-    },
-
-    cardSubtitle: {
-        color: "#8A94A6",
-        fontSize: 14,
-        lineHeight: 21,
-        fontWeight: "600",
-        textAlign: "center",
-        marginBottom: 22,
-    },
-
-    primaryButton: {
-        height: 58,
-        borderRadius: 18,
-        backgroundColor: "#6dc2f7",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 9,
-        shadowColor: "#6dc2f7",
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.35,
-        shadowRadius: 16,
-        elevation: 8,
-    },
-
-    primaryButtonText: {
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: "900",
-    },
-
-    secondaryButton: {
-        height: 56,
-        borderRadius: 18,
-        backgroundColor: "#F8FAFC",
-        borderWidth: 1,
-        borderColor: "#E5EAF2",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 9,
-        marginTop: 13,
-    },
-
-    secondaryButtonText: {
-        color: "#6dc2f7",
-        fontSize: 16,
-        fontWeight: "900",
-    },
-
-    footerTextRow: {
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: 5,
-        marginTop: 18,
-    },
-
-    footerText: {
-        color: "#8A94A6",
-        fontSize: 13,
-        fontWeight: "600",
-    },
-
-    footerLink: {
-        color: "#3b5bdb",
-        fontSize: 13,
-        fontWeight: "900",
-    },
+  screen: { flex: 1, backgroundColor: '#fff' },
+  overlay: { flex: 1, backgroundColor: 'rgba(28,45,87,0.12)' },
+  safe: { flex: 1 },
+  content: { flexGrow: 1 },
+  hero: {
+    flex: 1,
+    minHeight: 320,
+    width: '100%',
+    maxWidth: 480,
+    alignSelf: 'center',
+    paddingHorizontal: 28,
+    paddingVertical: 42,
+    justifyContent: 'center',
+  },
+  eyebrow: {
+    color: '#e7f2ff',
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  title: {
+    color: '#fff',
+    fontSize: 64,
+    lineHeight: 76,
+    fontWeight: '800',
+    letterSpacing: 0,
+  },
+  subtitle: {
+    color: '#fff',
+    fontSize: 21,
+    lineHeight: 30,
+    marginTop: 16,
+    maxWidth: 340,
+  },
+  actions: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+  actionContent: {
+    width: '100%',
+    maxWidth: 480,
+    alignSelf: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 26,
+    paddingBottom: 20,
+    gap: 12,
+  },
+  actionTitle: {
+    color: '#202632',
+    fontSize: 21,
+    lineHeight: 28,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  primary: {
+    minHeight: 54,
+    backgroundColor: '#3b5bdb',
+    borderRadius: 8,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 10,
+  },
+  primaryText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  secondary: {
+    minHeight: 54,
+    backgroundColor: '#f3f9ff',
+    borderWidth: 1,
+    borderColor: '#dcecf8',
+    borderRadius: 8,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 10,
+  },
+  secondaryText: { color: '#3b5bdb', fontSize: 15, fontWeight: '600' },
 });

@@ -1,72 +1,73 @@
-import React from "react";
+import React from 'react';
 import {
-    ImageBackground,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import Ionicons from "react-native-vector-icons/Ionicons";
-
-import { styles } from "./welcom.style";
+  ImageBackground,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { AuthStackParamList } from '../../../navigations/auth.navigation';
+import { styles as s } from './welcom.style';
 
 export function WelcomeScreen() {
-    const navigation = useNavigation<any>();
-
-    return (
-        <ImageBackground
-            source={require("../../../assets/images/9.jpg")}
-            style={styles.container}
-            resizeMode="cover"
-        >
-            <View style={styles.overlay}>
-                <View style={styles.hero}>
-                    <View style={styles.badge}>
-                        <Ionicons name="sparkles-outline" size={18} color="#6dc2f7" />
-                        <Text style={styles.badgeText}>Bienvenue</Text>
-                    </View>
-
-                    <Text style={styles.title}>Belela</Text>
-
-                    <Text style={styles.subtitle}>
-                        Partage tes moments, retrouve ta communauté et reste connecté à ce
-                        qui compte vraiment.
-                    </Text>
-                </View>
-
-                <View style={styles.bottomCard}>
-                    <Text style={styles.cardTitle}>Prêt à commencer?</Text>
-
-                    <Text style={styles.cardSubtitle}>
-                        Connecte-toi ou crée ton compte pour accéder à ton espace.
-                    </Text>
-
-                    <TouchableOpacity
-                        style={styles.primaryButton}
-                        onPress={() => navigation.navigate("signin")}
-                        activeOpacity={0.85}
-                    >
-                        <Text style={styles.primaryButtonText}>Se connecter</Text>
-                        <Ionicons name="arrow-forward-outline" size={21} color="#fff" />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.secondaryButton}
-                        onPress={() => navigation.navigate("signup")}
-                        activeOpacity={0.85}
-                    >
-                        <Ionicons name="person-add-outline" size={20} color="#6dc2f7" />
-                        <Text style={styles.secondaryButtonText}>Créer un compte</Text>
-                    </TouchableOpacity>
-
-                    <View style={styles.footerTextRow}>
-                        <Text style={styles.footerText}>Nouveau sur Belela?</Text>
-                        <TouchableOpacity onPress={() => navigation.navigate("signup")}>
-                            <Text style={styles.footerLink}>Rejoindre maintenant</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+  const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
+  return (
+    <ImageBackground
+      source={require('../../../assets/images/9.jpg')}
+      style={s.screen}
+      resizeMode="cover"
+    >
+      <StatusBar barStyle="light-content" backgroundColor="transparent" />
+      <View style={s.overlay}>
+        <SafeAreaView style={s.safe} edges={['top', 'left', 'right']}>
+          <ScrollView
+            contentContainerStyle={s.content}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={s.hero}>
+              <Text style={s.eyebrow}>Bienvenue dans votre communauté</Text>
+              <Text style={s.title}>Belela</Text>
+              <Text style={s.subtitle}>
+                Vos moments.{'\n'}Vos proches. Votre monde.
+              </Text>
             </View>
-        </ImageBackground>
-    );
+            <SafeAreaView style={s.actions} edges={['bottom']}>
+              <View style={s.actionContent}>
+                <Text style={s.actionTitle}>
+                  Les belles histoires commencent ici.
+                </Text>
+                <TouchableOpacity
+                  style={s.primary}
+                  activeOpacity={0.85}
+                  onPress={() => navigation.navigate('signin')}
+                  accessibilityRole="button"
+                >
+                  <Text style={s.primaryText}>Se connecter</Text>
+                  <MaterialIcons name="arrow-forward" size={20} color="#fff" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={s.secondary}
+                  activeOpacity={0.85}
+                  onPress={() => navigation.navigate('signup')}
+                  accessibilityRole="button"
+                >
+                  <MaterialIcons
+                    name="person-add-alt-1"
+                    size={20}
+                    color="#3b5bdb"
+                  />
+                  <Text style={s.secondaryText}>Créer un compte</Text>
+                </TouchableOpacity>
+              </View>
+            </SafeAreaView>
+          </ScrollView>
+        </SafeAreaView>
+      </View>
+    </ImageBackground>
+  );
 }
